@@ -11,6 +11,7 @@ class FeatureExtractor(nn.Module):
     def __init__(self, network = 'resnet34'):
         super(FeatureExtractor, self).__init__()
         model = timm.create_model(network, pretrained=True)
+        self.num_features = model.num_features
         layers = list(model.children())[:-1]
         self.feature_extractor = nn.Sequential(*layers)
         self.freeze_layers()
@@ -22,3 +23,6 @@ class FeatureExtractor(nn.Module):
     def forward(self, x):
         out = self.feature_extractor(x)
         return out
+    
+    def get_output_feature_size(self):
+        return self.num_features
