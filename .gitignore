@@ -1,2 +1,4 @@
 opt_proj/
 runs/
+data/
+*.pyc
