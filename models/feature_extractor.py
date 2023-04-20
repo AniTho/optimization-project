@@ -23,6 +23,3 @@ class FeatureExtractor(nn.Module):
     def forward(self, x):
         out = self.feature_extractor(x)
         return out
-    
-    def get_output_feature_size(self):
-        return self.num_features
