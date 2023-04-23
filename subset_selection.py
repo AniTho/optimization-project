@@ -3,6 +3,7 @@ from torchvision import transforms
 from dataload.mnist_load import MNISTDataset
 from dataload.celeba_load import CelebaDataset
 from dataload.lsun_load import LsunDataset
+from dataload.cifar_load import CIFARDataset
 
 def range_checker(min_value,max_value):
     def float_range_checker(arg):
@@ -30,6 +31,12 @@ def main(args):
         if args.subset:
             CelebaDataset(subset=args.subset, sub_selection_technique=args.technique, 
                          percentage=args.percentage, transform=transform)
+            
+    elif args.dataset == 'cifar10':
+        if args.subset:
+            CIFARDataset(subset=args.subset, sub_selection_technique=args.technique, 
+                         percentage=args.percentage, transform=transform)
+            
     else:
         if args.subset:
             LsunDataset(subset=args.subset, sub_selection_technique=args.technique, 
@@ -46,6 +53,6 @@ which is used for training since it is non adaptive data subset selection.''')
                         help = 'Percentage of points that has to be kept')
     parser.add_argument('-d','--dataset', action='store', type=str, default='mnist',
                         help='Select the dataset to run experiment on',
-                        choices=['mnist', 'lsun', 'celeba'])
+                        choices=['mnist', 'lsun', 'celeba', 'cifar10'])
     args = parser.parse_args()
     main(args)
