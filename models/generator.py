@@ -2,11 +2,10 @@ import torch
 from torch import nn
 
 class DCGanGenerator(nn.Module):
-    def __init__(self):
+    def __init__(self, latent_dim):
         super(DCGanGenerator, self).__init__()
         # Model hyperparameters
         num_filters = [512, 256, 128, 64]
-        latent_dim = 100
         strides = [2, 2, 2, 2]
         input_vector_channel = [3]
 
