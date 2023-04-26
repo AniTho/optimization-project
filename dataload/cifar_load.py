@@ -21,7 +21,7 @@ class CIFARDataset(Dataset):
             self.idxs = list(range(len(self.data)))
         else:
             # For storing idxs in a file and loading for fast retrieval
-            if os.path.exists(f'cifar_{sub_selection_technique}.txt'):
+            if os.path.exists(f'data/cifar_{sub_selection_technique}_{int(percentage*100)}.txt'):
                 self.idxs = np.loadtxt(f'data/cifar_{sub_selection_technique}_{int(percentage*100)}.txt').tolist()
             else:
                 self.idxs = self.subset_selection(sub_selection_technique, percentage, bs)
@@ -34,7 +34,6 @@ class CIFARDataset(Dataset):
     def __getitem__(self, idx):
         img = self.data[self.idxs[idx]]
         # Convert to 3 channel image
-        img = torch.permute(torch.stack([img, img, img]), (1,2,0)).numpy()
         img = Image.fromarray(img)
         if self.transform:
             img = self.transform(img)
@@ -73,7 +72,7 @@ class CIFARDataset(Dataset):
                                                      [0.229, 0.224, 0.225])
                                         ])
         feature_extractor = FeatureExtractor('resnet50')
-        feature_extractor = feature_extractor.to(device)
+        feature_extractor = feature_extractor.cuda(1)
         feature_extractor.eval()
         final_idxs = []
         with torch.no_grad():
@@ -82,7 +81,7 @@ class CIFARDataset(Dataset):
             dataloader = DataLoader(complete_dataset, batch_size = bs, shuffle=False)
             list_of_features = []
             for idx, imgs in tqdm(enumerate(dataloader), leave = False, total = len(dataloader)):
-                imgs = imgs.to(device)
+                imgs = imgs.cuda(1)
                 out = feature_extractor(imgs)
                 list_of_features.extend(out.cpu().detach().numpy().tolist())
                 if len(list_of_features) >= 5000:

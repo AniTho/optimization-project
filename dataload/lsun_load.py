@@ -17,15 +17,16 @@ class LsunDataset(Dataset):
     def __init__(self, subset = False, sub_selection_technique = None,  percentage = 0.1, 
                  transform = None, bs = 64):
         self.data = list(pathlib.Path('data/lsun-bedroom/images').glob('*.jpg'))
+        self.data.sort()
         if not subset:
             self.idxs = list(range(len(self.data)))
         else:
             # For storing idxs in a file and loading for fast retrieval
-            if os.path.exists(f'celeba_{sub_selection_technique}.txt'):
-                self.idxs = np.loadtxt(f'data/celeba_{sub_selection_technique}.txt').tolist()
+            if os.path.exists(f'data/celeba_{sub_selection_technique}_{int(percentage*100)}.txt'):
+                self.idxs = np.loadtxt(f'data/celeba_{sub_selection_technique}_{int(percentage*100)}.txt').tolist()
             else:
                 self.idxs = self.subset_selection(sub_selection_technique, percentage, bs)
-                np.savetxt(f'data/celeba_{sub_selection_technique}.txt', np.array(self.idxs), fmt='%d')
+                np.savetxt(f'data/celeba_{sub_selection_technique}_{int(percentage*100)}.txt', np.array(self.idxs), fmt='%d')
         self.transform = transform
 
     def __len__(self):
@@ -48,7 +49,7 @@ class LsunDataset(Dataset):
         elif sub_selection_technique == 'disparity_sum':
             sub_selection_method = DisparitySumFunction(n = n_ground, mode = 'dense', data = gset, metric='euclidean')
         elif sub_selection_technique == 'log_determinant':
-            sub_selection_method = LogDeterminantFunction(n = n_ground, mode = 'dense', lambdaVal=2, data = gset, metric='euclidean')
+            sub_selection_method = LogDeterminantFunction(n = n_ground, mode = 'dense', lambdaVal=1, data = gset, metric='euclidean')
         else:
             raise Exception("Mentioned method for subset selection is not available")
         
@@ -71,7 +72,7 @@ class LsunDataset(Dataset):
                                                      [0.229, 0.224, 0.225])
                                         ])
         feature_extractor = FeatureExtractor('resnet50')
-        feature_extractor = feature_extractor.to(device)
+        feature_extractor = feature_extractor.cuda(1)
         feature_extractor.eval()
         final_idxs = []
         with torch.no_grad():
@@ -80,7 +81,7 @@ class LsunDataset(Dataset):
             dataloader = DataLoader(complete_dataset, batch_size = bs, shuffle=False)
             list_of_features = []
             for idx, imgs in tqdm(enumerate(dataloader), leave = False, total = len(dataloader)):
-                imgs = imgs.to(device)
+                imgs = imgs.cuda(1)
                 out = feature_extractor(imgs)
                 list_of_features.extend(out.cpu().detach().numpy().tolist())
                 if len(list_of_features) >= 5000:
