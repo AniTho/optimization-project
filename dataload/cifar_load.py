@@ -22,7 +22,7 @@ class CIFARDataset(Dataset):
         else:
             # For storing idxs in a file and loading for fast retrieval
             if os.path.exists(f'data/cifar_{sub_selection_technique}_{int(percentage*100)}.txt'):
-                self.idxs = np.loadtxt(f'data/cifar_{sub_selection_technique}_{int(percentage*100)}.txt').tolist()
+                self.idxs = np.loadtxt(f'data/cifar_{sub_selection_technique}_{int(percentage*100)}.txt', dtype=int).tolist()
             else:
                 self.idxs = self.subset_selection(sub_selection_technique, percentage, bs)
                 np.savetxt(f'data/cifar_{sub_selection_technique}_{int(percentage*100)}.txt', np.array(self.idxs), fmt='%d')
